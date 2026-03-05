@@ -1,0 +1,22 @@
+{
+  "name": "Hai sbagliato! tracker",
+  "short_name": "Hai sbagliato!",
+  "description": "Traccia i tuoi errori e il tuo umore",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#161D26",
+  "theme_color": "#161D26",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

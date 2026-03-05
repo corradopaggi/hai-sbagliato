@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hai sbagliato!">
+  <meta name="theme-color" content="#161D26">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Hai sbagliato! tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Sidebar Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" class="sidebar">
+    <div class="sidebar-nav">
+      <div class="sidebar-section">Menu</div>
+      <button class="sidebar-item active" onclick="navigate('home')" data-nav="home">
+        <span class="sidebar-item-icon">🔴</span> Home
+      </button>
+      <button class="sidebar-item" onclick="navigate('dashboard')" data-nav="dashboard">
+        <span class="sidebar-item-icon">📊</span> Stats
+      </button>
+      <button class="sidebar-item" onclick="navigate('settings')" data-nav="settings">
+        <span class="sidebar-item-icon">⚙️</span> Settings
+      </button>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="header">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <h1 class="header-title">
+      <span style="color: #FF9900;">Hai sbagliato!</span> tracker
+    </h1>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- PAGE: Home -->
+    <div id="page-home" class="page active">
+      <div class="center-container">
+        <button class="big-red-btn" onclick="navigate('mood')">
+          HAI SBAGLIATO!
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE: Mood -->
+    <div id="page-mood" class="page">
+      <div class="center-container">
+        <h2>Seleziona il tuo umore:</h2>
+        <div class="mood-grid">
+          <button class="mood-btn" onclick="selectMood('ansia')">
+            <span class="mood-emoji">😰</span>
+            <span class="mood-label">Ansia</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('delusione')">
+            <span class="mood-emoji">😔</span>
+            <span class="mood-label">Delusione</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('frustrazione')">
+            <span class="mood-emoji">😤</span>
+            <span class="mood-label">Frustrazione</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('imbarazzo')">
+            <span class="mood-emoji">😅</span>
+            <span class="mood-label">Imbarazzo</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('indifferenza')">
+            <span class="mood-emoji">😐</span>
+            <span class="mood-label">Indifferenza</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('noia')">
+            <span class="mood-emoji">🥱</span>
+            <span class="mood-label">Noia</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('panico')">
+            <span class="mood-emoji">😱</span>
+            <span class="mood-label">Panico</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('rabbia')">
+            <span class="mood-emoji">😡</span>
+            <span class="mood-label">Rabbia</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('rassegnazione')">
+            <span class="mood-emoji">🤦</span>
+            <span class="mood-label">Rassegnazione</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('tranquillità')">
+            <span class="mood-emoji">😌</span>
+            <span class="mood-label">Tranquillità</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('tristezza')">
+            <span class="mood-emoji">😢</span>
+            <span class="mood-label">Tristezza</span>
+          </button>
+          <button class="mood-btn" onclick="selectMood('altro')">
+            <span class="mood-emoji">🤷</span>
+            <span class="mood-label">Altro</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Confirm -->
+    <div id="page-confirm" class="page">
+      <div class="center-container">
+        <div class="confirm-msg">
+          <span class="confirm-emoji">✅</span>
+          <h2>Registrato!</h2>
+          <p id="confirm-text"></p>
+          <p id="encourage-text" class="encourage-text"></p>
+          <button class="back-btn" onclick="navigate('home')">Torna alla home</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Dashboard -->
+    <div id="page-dashboard" class="page">
+      <div class="dashboard">
+        <h1>📊 Dashboard Errori</h1>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-number" id="stat-today">-</span>
+            <span class="stat-label">Oggi</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-week">-</span>
+            <span class="stat-label">Questa settimana</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-month">-</span>
+            <span class="stat-label">Questo mese</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-total">-</span>
+            <span class="stat-label">Totale</span>
+          </div>
+        </div>
+        <div class="mood-stats">
+          <h2>📅 Ultimi 7 giorni</h2>
+          <canvas id="weekChart" style="width:100%; height:200px;"></canvas>
+        </div>
+        <div class="mood-stats" style="margin-top: 20px;">
+          <h2>📈 Statistiche per umore</h2>
+          <div class="pie-container">
+            <canvas id="pieChart" style="width:200px; height:200px;"></canvas>
+            <div id="pie-legend" class="pie-legend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Settings -->
+    <div id="page-settings" class="page">
+      <div class="dashboard">
+        <h1>⚙️ Settings</h1>
+        <div class="section">
+          <h3>🗑️ Gestione dati</h3>
+          <p style="color: #565959; margin-bottom: 20px;">Gestisci i dati salvati nell'app.</p>
+
+          <div class="settings-action">
+            <div>
+              <strong>Cancella ultima entry</strong>
+              <p style="color: #565959; font-size: 13px;">Rimuove l'ultimo errore registrato.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="deleteLastEntry()">↩️ Annulla ultimo</button>
+          </div>
+
+          <div class="settings-action danger">
+            <div>
+              <strong style="color: #D13212;">Cancella tutti i dati</strong>
+              <p style="color: #565959; font-size: 13px;">Elimina permanentemente tutti gli errori registrati. Questa azione è irreversibile.</p>
+            </div>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Cancella tutto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

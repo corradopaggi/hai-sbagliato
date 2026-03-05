@@ -384,8 +384,18 @@ h2 {
 
 @media (max-width: 480px) {
   .mood-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 100%;
+  }
+  .mood-btn {
+    padding: 12px 8px;
+  }
+  .mood-emoji {
+    font-size: 32px;
+  }
+  .mood-label {
+    font-size: 11px;
   }
   .big-red-btn {
     width: 200px;
@@ -393,7 +403,26 @@ h2 {
     font-size: 24px;
   }
   .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .main-content {
+    padding: 12px;
+  }
+  .dashboard {
+    padding: 12px;
+  }
+  .pie-container {
     grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .pie-legend {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .encourage-text {
+    font-size: 15px;
+    padding: 12px 15px;
+    max-width: 100%;
   }
 }
 
@@ -495,5 +524,6 @@ h2 {
   }
   .pie-legend {
     grid-template-columns: 1fr 1fr;
+    width: 100%;
   }
 }

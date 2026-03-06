@@ -557,25 +557,33 @@ function importBackup(event) {
 }
 
 // ===== Updates =====
+const APP_VERSION = '1.0.3';
+
 async function checkForUpdates() {
   const status = document.getElementById('update-status');
   status.textContent = 'Controllo in corso...';
   try {
-    const reg = await navigator.serviceWorker.getRegistration();
-    if (reg) {
-      await reg.update();
-      if (reg.waiting) {
-        status.textContent = '✅ Nuova versione trovata! Riavvia l\'app per aggiornare.';
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        setTimeout(() => location.reload(), 1500);
-      } else {
-        status.textContent = '✅ L\'app è aggiornata all\'ultima versione.';
+    const res = await fetch('./version.json?t=' + Date.now());
+    const data = await res.json();
+    if (data.version !== APP_VERSION) {
+      status.textContent = `🆕 Nuova versione disponibile: v${data.version}! Aggiornamento in corso...`;
+      // Forza aggiornamento SW e ricarica
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        await reg.update();
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
+      // Pulisci cache e ricarica
+      if (caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      setTimeout(() => location.reload(true), 1000);
     } else {
-      status.textContent = 'Service worker non trovato.';
+      status.textContent = '✅ L\'app è aggiornata all\'ultima versione.';
     }
   } catch (err) {
-    status.textContent = '❌ Errore nel controllo aggiornamenti.';
+    status.textContent = '❌ Errore nel controllo. Verifica la connessione.';
   }
 }
 

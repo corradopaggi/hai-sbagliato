@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hai-sbagliato-v10';
+const CACHE_NAME = 'hai-sbagliato-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -27,6 +27,11 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // version.json sempre dal network
+  if (e.request.url.includes('version.json')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );

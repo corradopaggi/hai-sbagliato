@@ -447,35 +447,31 @@ async function shareEncouragement() {
 }
 
 // ===== Backup & Restore =====
-async function getBackupData() {
+async function getBackupCsv() {
   const events = await getAllEvents();
   if (events.length === 0) { alert('Nessun dato da esportare.'); return null; }
-  const json = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
-  const csv = 'data,ora,umore\n' + events.map(e => {
-    const d = new Date(e.created_at);
-    return `${d.toLocaleDateString('it-IT')},${d.toLocaleTimeString('it-IT')},${e.mood}`;
-  }).join('\n');
-  const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}`;
-  return { json, csv, filename };
+  const csv = 'created_at,mood\n' + events.map(e => `${e.created_at},${e.mood}`).join('\n');
+  const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.csv`;
+  return { csv, filename, count: events.length };
 }
 
 async function exportBackup() {
-  const backup = await getBackupData();
+  const backup = await getBackupCsv();
   if (!backup) return;
-  const blob = new Blob([backup.json], { type: 'application/json' });
+  const blob = new Blob([backup.csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = backup.filename + '.json';
+  a.download = backup.filename;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 async function shareBackup() {
-  const backup = await getBackupData();
+  const backup = await getBackupCsv();
   if (!backup) return;
   const blob = new Blob([backup.csv], { type: 'text/csv' });
-  const file = new File([blob], backup.filename + '.csv', { type: 'text/csv' });
+  const file = new File([blob], backup.filename, { type: 'text/csv' });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
@@ -486,13 +482,23 @@ async function shareBackup() {
     }
   }
 
-  // Fallback: download CSV
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = backup.filename + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+  // Fallback: download
+  exportBackup();
+}
+
+function parseCsvBackup(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return null;
+  const header = lines[0].toLowerCase();
+  if (!header.includes('created_at') || !header.includes('mood')) return null;
+  const events = [];
+  for (let i = 1; i < lines.length; i++) {
+    const parts = lines[i].split(',');
+    if (parts.length >= 2) {
+      events.push({ created_at: parts[0].trim(), mood: parts[1].trim() });
+    }
+  }
+  return events.length > 0 ? events : null;
 }
 
 function importBackup(event) {
@@ -501,12 +507,26 @@ function importBackup(event) {
   const reader = new FileReader();
   reader.onload = async (e) => {
     try {
-      const data = JSON.parse(e.target.result);
-      if (!data.events || !Array.isArray(data.events)) {
-        alert('File non valido.');
+      let events;
+      const text = e.target.result;
+
+      // Prova CSV
+      events = parseCsvBackup(text);
+
+      // Fallback JSON (retrocompatibilità)
+      if (!events) {
+        try {
+          const data = JSON.parse(text);
+          if (data.events && Array.isArray(data.events)) events = data.events;
+        } catch (err) { /* non è JSON */ }
+      }
+
+      if (!events) {
+        alert('File non valido. Usa un file CSV o JSON esportato dall\'app.');
         return;
       }
-      if (!confirm(`Importare ${data.events.length} eventi? I dati attuali verranno sostituiti.`)) return;
+
+      if (!confirm(`Importare ${events.length} eventi? I dati attuali verranno sostituiti.`)) return;
 
       // Clear existing
       await new Promise((resolve, reject) => {
@@ -520,14 +540,14 @@ function importBackup(event) {
       await new Promise((resolve, reject) => {
         const tx = db.transaction('events', 'readwrite');
         const store = tx.objectStore('events');
-        data.events.forEach(ev => {
+        events.forEach(ev => {
           store.add({ mood: ev.mood, created_at: ev.created_at });
         });
         tx.oncomplete = () => resolve();
         tx.onerror = e => reject(e.target.error);
       });
 
-      alert(`${data.events.length} eventi importati con successo!`);
+      alert(`${events.length} eventi importati con successo!`);
     } catch (err) {
       alert('Errore nella lettura del file.');
     }

@@ -438,3 +438,6 @@ if ('serviceWorker' in navigator) {
 
 // ===== Init =====
 openDB();
+
+// Sempre partire dalla home all'avvio
+navigate('home');

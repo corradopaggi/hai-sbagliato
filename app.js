@@ -450,19 +450,23 @@ async function shareEncouragement() {
 async function getBackupData() {
   const events = await getAllEvents();
   if (events.length === 0) { alert('Nessun dato da esportare.'); return null; }
-  const data = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
-  const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.json`;
-  return { data, filename };
+  const json = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
+  const csv = 'data,ora,umore\n' + events.map(e => {
+    const d = new Date(e.created_at);
+    return `${d.toLocaleDateString('it-IT')},${d.toLocaleTimeString('it-IT')},${e.mood}`;
+  }).join('\n');
+  const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}`;
+  return { json, csv, filename };
 }
 
 async function exportBackup() {
   const backup = await getBackupData();
   if (!backup) return;
-  const blob = new Blob([backup.data], { type: 'application/json' });
+  const blob = new Blob([backup.json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = backup.filename;
+  a.download = backup.filename + '.json';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -470,39 +474,25 @@ async function exportBackup() {
 async function shareBackup() {
   const backup = await getBackupData();
   if (!backup) return;
+  const blob = new Blob([backup.csv], { type: 'text/csv' });
+  const file = new File([blob], backup.filename + '.csv', { type: 'text/csv' });
 
-  // Prova prima con file
-  try {
-    const blob = new Blob([backup.data], { type: 'text/plain' });
-    const file = new File([blob], backup.filename.replace('.json', '.txt'), { type: 'text/plain' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
-      return;
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') return;
-  }
-
-  // Fallback: condividi come testo
-  if (navigator.share) {
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({
-        title: 'Hai sbagliato! Backup',
-        text: backup.data
-      });
+      await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
       return;
     } catch (err) {
       if (err.name === 'AbortError') return;
     }
   }
 
-  // Ultimo fallback: copia negli appunti
-  try {
-    await navigator.clipboard.writeText(backup.data);
-    alert('Backup copiato negli appunti!');
-  } catch (err) {
-    alert('Condivisione non supportata. Usa Esporta.');
-  }
+  // Fallback: download CSV
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = backup.filename + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function importBackup(event) {

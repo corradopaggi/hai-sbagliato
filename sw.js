@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hai-sbagliato-v7';
+const CACHE_NAME = 'hai-sbagliato-v8';
 const ASSETS = [
   './',
   './index.html',

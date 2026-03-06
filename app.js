@@ -525,6 +525,29 @@ function importBackup(event) {
   reader.readAsText(file);
 }
 
+// ===== Updates =====
+async function checkForUpdates() {
+  const status = document.getElementById('update-status');
+  status.textContent = 'Controllo in corso...';
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (reg) {
+      await reg.update();
+      if (reg.waiting) {
+        status.textContent = '✅ Nuova versione trovata! Riavvia l\'app per aggiornare.';
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        status.textContent = '✅ L\'app è aggiornata all\'ultima versione.';
+      }
+    } else {
+      status.textContent = 'Service worker non trovato.';
+    }
+  } catch (err) {
+    status.textContent = '❌ Errore nel controllo aggiornamenti.';
+  }
+}
+
 // ===== Service Worker =====
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');

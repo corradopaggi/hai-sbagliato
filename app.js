@@ -470,17 +470,38 @@ async function exportBackup() {
 async function shareBackup() {
   const backup = await getBackupData();
   if (!backup) return;
-  const blob = new Blob([backup.data], { type: 'application/json' });
-  const file = new File([blob], backup.filename, { type: 'application/json' });
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
+  // Prova prima con file
+  try {
+    const blob = new Blob([backup.data], { type: 'text/plain' });
+    const file = new File([blob], backup.filename.replace('.json', '.txt'), { type: 'text/plain' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
-    } catch (err) {
-      if (err.name !== 'AbortError') alert('Errore nella condivisione.');
+      return;
     }
-  } else {
-    alert('Condivisione non supportata su questo dispositivo. Usa Esporta.');
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+  }
+
+  // Fallback: condividi come testo
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Hai sbagliato! Backup',
+        text: backup.data
+      });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  // Ultimo fallback: copia negli appunti
+  try {
+    await navigator.clipboard.writeText(backup.data);
+    alert('Backup copiato negli appunti!');
+  } catch (err) {
+    alert('Condivisione non supportata. Usa Esporta.');
   }
 }
 

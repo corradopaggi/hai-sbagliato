@@ -431,6 +431,21 @@ function clearAllData() {
   tx.oncomplete = () => alert('Tutti i dati sono stati cancellati.');
 }
 
+// ===== Share Encouragement =====
+async function shareEncouragement() {
+  const text = document.getElementById('encourage-text').textContent;
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: `Hai sbagliato! 🔴\n\n${text}` });
+    } catch (err) {
+      if (err.name !== 'AbortError') alert('Errore nella condivisione.');
+    }
+  } else {
+    await navigator.clipboard.writeText(text);
+    alert('Messaggio copiato negli appunti!');
+  }
+}
+
 // ===== Backup & Restore =====
 async function exportBackup() {
   const events = await getAllEvents();

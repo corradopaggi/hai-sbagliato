@@ -184,6 +184,28 @@
             <button class="btn btn-danger" onclick="clearAllData()">🗑️ Cancella tutto</button>
           </div>
         </div>
+
+        <div class="section">
+          <h3>💾 Backup & Restore</h3>
+          <p style="color: #565959; margin-bottom: 20px;">Esporta o importa i tuoi dati per trasferirli su un altro dispositivo.</p>
+
+          <div class="settings-action">
+            <div>
+              <strong>Esporta backup</strong>
+              <p style="color: #565959; font-size: 13px;">Scarica un file JSON con tutti i tuoi dati.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="exportBackup()">📥 Esporta</button>
+          </div>
+
+          <div class="settings-action">
+            <div>
+              <strong>Importa backup</strong>
+              <p style="color: #565959; font-size: 13px;">Ripristina i dati da un file di backup. I dati esistenti verranno sostituiti.</p>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤 Importa</button>
+          </div>
+        </div>
       </div>
     </div>
 

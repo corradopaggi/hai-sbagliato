@@ -431,6 +431,64 @@ function clearAllData() {
   tx.oncomplete = () => alert('Tutti i dati sono stati cancellati.');
 }
 
+// ===== Backup & Restore =====
+async function exportBackup() {
+  const events = await getAllEvents();
+  if (events.length === 0) {
+    alert('Nessun dato da esportare.');
+    return;
+  }
+  const data = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.events || !Array.isArray(data.events)) {
+        alert('File non valido.');
+        return;
+      }
+      if (!confirm(`Importare ${data.events.length} eventi? I dati attuali verranno sostituiti.`)) return;
+
+      // Clear existing
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('events', 'readwrite');
+        tx.objectStore('events').clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+      });
+
+      // Import
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('events', 'readwrite');
+        const store = tx.objectStore('events');
+        data.events.forEach(ev => {
+          store.add({ mood: ev.mood, created_at: ev.created_at });
+        });
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+      });
+
+      alert(`${data.events.length} eventi importati con successo!`);
+    } catch (err) {
+      alert('Errore nella lettura del file.');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
 // ===== Service Worker =====
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');

@@ -439,11 +439,25 @@ async function exportBackup() {
     return;
   }
   const data = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
+  const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.json`;
   const blob = new Blob([data], { type: 'application/json' });
+  const file = new File([blob], filename, { type: 'application/json' });
+
+  // Usa Web Share API se disponibile (iOS/Android)
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return; // utente ha annullato
+    }
+  }
+
+  // Fallback: download diretto
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 }

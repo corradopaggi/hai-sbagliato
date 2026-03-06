@@ -447,34 +447,41 @@ async function shareEncouragement() {
 }
 
 // ===== Backup & Restore =====
-async function exportBackup() {
+async function getBackupData() {
   const events = await getAllEvents();
-  if (events.length === 0) {
-    alert('Nessun dato da esportare.');
-    return;
-  }
+  if (events.length === 0) { alert('Nessun dato da esportare.'); return null; }
   const data = JSON.stringify({ version: 1, exported: new Date().toISOString(), events }, null, 2);
   const filename = `hai-sbagliato-backup-${new Date().toISOString().slice(0,10)}.json`;
-  const blob = new Blob([data], { type: 'application/json' });
-  const file = new File([blob], filename, { type: 'application/json' });
+  return { data, filename };
+}
 
-  // Usa Web Share API se disponibile (iOS/Android)
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
-      return;
-    } catch (err) {
-      if (err.name === 'AbortError') return; // utente ha annullato
-    }
-  }
-
-  // Fallback: download diretto
+async function exportBackup() {
+  const backup = await getBackupData();
+  if (!backup) return;
+  const blob = new Blob([backup.data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = backup.filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+async function shareBackup() {
+  const backup = await getBackupData();
+  if (!backup) return;
+  const blob = new Blob([backup.data], { type: 'application/json' });
+  const file = new File([blob], backup.filename, { type: 'application/json' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Hai sbagliato! Backup' });
+    } catch (err) {
+      if (err.name !== 'AbortError') alert('Errore nella condivisione.');
+    }
+  } else {
+    alert('Condivisione non supportata su questo dispositivo. Usa Esporta.');
+  }
 }
 
 function importBackup(event) {

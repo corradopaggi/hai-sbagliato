@@ -21,13 +21,13 @@
     <div class="sidebar-nav">
       <div class="sidebar-section">Menu</div>
       <button class="sidebar-item active" onclick="navigate('home')" data-nav="home">
-        <span class="sidebar-item-icon">🔴</span> Home
+        <span class="sidebar-item-icon">🔴</span> Registra evento
       </button>
       <button class="sidebar-item" onclick="navigate('dashboard')" data-nav="dashboard">
-        <span class="sidebar-item-icon">📊</span> Stats
+        <span class="sidebar-item-icon">📊</span> Statistiche
       </button>
       <button class="sidebar-item" onclick="navigate('settings')" data-nav="settings">
-        <span class="sidebar-item-icon">⚙️</span> Settings
+        <span class="sidebar-item-icon">⚙️</span> Impostazioni
       </button>
     </div>
   </nav>
@@ -166,7 +166,7 @@
     <!-- PAGE: Settings -->
     <div id="page-settings" class="page">
       <div class="dashboard">
-        <h1>⚙️ Settings</h1>
+        <h1>⚙️ Impostazioni</h1>
         <div class="section">
           <h3>🗑️ Gestione dati</h3>
           <p style="color: #565959; margin-bottom: 20px;">Gestisci i dati salvati nell'app.</p>
@@ -195,9 +195,12 @@
           <div class="settings-action">
             <div>
               <strong>Esporta backup</strong>
-              <p style="color: #565959; font-size: 13px;">Scarica un file JSON con tutti i tuoi dati.</p>
+              <p style="color: #565959; font-size: 13px;">Scarica o condividi un file JSON con tutti i tuoi dati.</p>
             </div>
-            <button class="btn btn-secondary" onclick="exportBackup()">📥 Esporta</button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="exportBackup()">📥 Esporta</button>
+              <button class="btn btn-secondary" onclick="shareBackup()">📤 Condividi</button>
+            </div>
           </div>
 
           <div class="settings-action">
